@@ -1,0 +1,12 @@
+.Bar {
+    background-color: #363232;
+    box-shadow: rgba(255, 255, 255, 0.45) 0px 25px 20px -20px;
+}
+
+.sorted {
+    background-color: greenyellow;
+}
+
+.shifting {
+    background-color: orange;
+}
