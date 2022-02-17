@@ -7,13 +7,13 @@
     border-radius: 10px;
     background-color: transparent;
     padding: 0;
-    height: 470px;
+    height: 420px;
 }
 
 .visualizer {
     display: flex;
     justify-content: space-evenly;
-    height: 500px;
+    height: 450px;
 }
 
 .visualizer-sort-options {
@@ -45,8 +45,8 @@
 }
 
 .button {
-    width: 28%;
-    height: 7%;
+    width: 33%;
+    height: 6%;
     font-size: 1vw;
     outline: none;
     color: #fff;

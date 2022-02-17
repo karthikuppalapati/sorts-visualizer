@@ -432,12 +432,12 @@ class Visualizer extends Component {
                 </div>
                 
                 <div style={{display:'flex', flexDirection:'column'}}>
-                    <p style={{color:'white',float:'left', marginLeft:'25%', letterSpacing:'3px' , textAlign:'left'}}>{this.state.comparisons} comparisons have been done so far</p>
+                    <p style={{color:'white',float:'left', marginLeft:'25%', letterSpacing:'3px' , textAlign:'left', marginTop:'0'}}>{this.state.comparisons} comparisons have been done so far</p>
                     
                     {
                         currentSort !== null ? (<div style={{display:'flex', float:'left',}}>
-                        <p style={{color: 'white', marginTop:'0', marginLeft:'250px', letterSpacing:'2px'}} >Time Complexity : {tcomplex}</p>
-                        <p style={{color: 'white', marginTop:'0', marginLeft:'300px', letterSpacing:'2px'}} >Space Complexity : {scomplex} </p>
+                        <p style={{color: 'white', marginTop:'0', marginLeft:'230px', letterSpacing:'2px', marginBottom:'0'}} >Time Complexity : {tcomplex}</p>
+                        <p style={{color: 'white', marginTop:'0', marginLeft:'230px', letterSpacing:'2px', marginBottom:'0'}} >Space Complexity : {scomplex} </p>
                         </div>) : ''
                     }
                     
