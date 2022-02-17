@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import Bar from './Bar';
 import './Visualizer.css'
+// import TeX from 'react-formula-beautifier';
+import Tex2SVG from "react-hook-mathjax";
 
 class Visualizer extends Component {
     static defaultProps = {
         arraySize: 100
     }
     constructor(props) {
-        super()
+        super(props)
         this.state = {
-            nums:this.shuffle(Array.from({length: 100}, (v, i) => 4*i)),
-            color:Array.from({length:100}, () => '#00acee'),
-            sorting: false
+            nums:this.shuffle(Array.from({length: this.props.arraySize}, (v, i) => 4*i)),
+            color:Array.from({length:this.props.arraySize}, () => '#00acee'),
+            border: Array.from({length:this.props.arraySize}, () => 'black'),
+            comparisons:0,
+            currentSort: null,
+            isSorting: false
         }
     }
    
@@ -30,8 +35,10 @@ class Visualizer extends Component {
         return array;
     }
 
-    bubbleSort = async () => {
-        this.setState({sorting: true})
+    bubbleSort = async (e) => {
+
+        console.log(e)
+       
         let { nums, color } = this.state
         
         for(var i = 0; i < nums.length; i++){
@@ -39,14 +46,17 @@ class Visualizer extends Component {
                 
                 color[j] = '#d3cfd4'
                 color[j+1] = '#d3cfd4' 
+                this.setState({color})
+                await this.sleep(10)
 
                 if(nums[j] > nums[j+1]){
                     var temp = nums[j]
                     nums[j] = nums[j + 1]
                     nums[j+1] = temp
-                                
+                    color[j] = 'orange'
+                    color[j+1] = 'orange'    
                 }
-
+                this.setState(st => ({comparisons: st.comparisons + 1}))
                 this.setState({nums,color})
 
                 color[j] = '#00acee'
@@ -63,6 +73,7 @@ class Visualizer extends Component {
         this.setState({sorting: true})
         const { nums, color } = this.state
         let n = nums.length;
+
         for (let i = 1; i < n; i++) {
             let current = nums[i];
             for(let k=0;k<i;k++) color[k] = '#00ff91'
@@ -76,6 +87,7 @@ class Visualizer extends Component {
                 this.setState({nums, color})
                 await this.sleep(30)
                 color[j+1] = '#00ff91'
+                this.setState(st => ({comparisons: st.comparisons + 1}))
                 this.setState({color})
             }
             nums[j+1] = current;
@@ -106,7 +118,8 @@ class Visualizer extends Component {
                 j++;
             }
             k++;    
-            await this.sleep(50) 
+            await this.sleep(50)
+            this.setState(st => ({comparisons: st.comparisons + 1})) 
             this.setState({nums:arr})   
         }
         while (i < n1) {
@@ -160,33 +173,36 @@ class Visualizer extends Component {
         let n = nums.length;
             
         for(let i = 0; i < n; i++) {
-            let min = i;
-            color[min] = '#d3cfd4'
-            await this.sleep(50)
+            let minIdx = i;
+            color[minIdx] = 'orange'
+            await this.sleep(10)
             this.setState({color})
 
             for(let j = i+1; j < n; j++){
                 color[j] = '#d3cfd4'
-                await this.sleep(50)
                 this.setState({color})
-
-                if(nums[j] < nums[min]) {
-                    color[min] = '#00acee'
-                    min=j;
-                    color[min] = '#d3cfd4'
+                await this.sleep(10)
+                
+                this.setState(st => ({comparisons: st.comparisons + 1}))
+                if(nums[j] < nums[minIdx]) {
+                    color[minIdx] = '#00acee'
+                    minIdx=j;
+                    color[minIdx] = 'orange'
                     this.setState({color})
-                    await this.sleep(50) 
+                    await this.sleep(10) 
                 }
 
                 color[j] = '#00acee'
-                color[min] = '#d3cfd4'
+                color[minIdx] = 'orange'
             }
 
-            if (min !== i) {
+            if (minIdx !== i) {
                 let tmp = nums[i]; 
-                nums[i] = nums[min];
-                nums[min] = tmp; 
-                this.setState({nums})     
+                nums[i] = nums[minIdx];
+                nums[minIdx] = tmp;
+                
+                this.setState({nums, color})
+                await this.sleep(10)     
             }
 
             for(let k=0;k<=i;k++)
@@ -222,6 +238,8 @@ class Visualizer extends Component {
                 this.setState({nums: arr})
                 await this.sleep(50)
             }
+
+            this.setState(st => ({comparisons: st.comparisons + 1}))
             
         }
 
@@ -235,7 +253,6 @@ class Visualizer extends Component {
     }
      
     async quickSort(arr, low, high) {
-        this.setState({sorting: true})
         if (low < high) {
 
             let { color } = this.state
@@ -244,15 +261,55 @@ class Visualizer extends Component {
 
             await this.quickSort(arr, low, pi - 1);
             for(let i=low;i<=pi-1;i++)
-            {color[i] = '#00ff91';
-            this.setState({color})
-            await this.sleep(50)}
+            {
+                color[i] = '#00ff91';
+                this.setState({color})
+                await this.sleep(10)
+            }
 
             await this.quickSort(arr, pi + 1, high);
             for(let i=pi+1;i<=high;i++)
-            {color[i] = '#00ff91'
-            this.setState({color})
-            await this.sleep(50)}
+            {   
+                color[i] = '#00ff91'
+                this.setState({color})
+                await this.sleep(10)
+            }
+        }
+    }
+
+    handleSort = async (e) => {
+        let sort = e.target.name
+        this.setState({currentSort: sort})
+        
+        if(sort === 'bubble') 
+        {   
+            this.setState({isSorting: true})
+            await this.bubbleSort()
+            this.setState({isSorting: false})
+        }
+        if(sort === 'insertion') 
+        {   
+            this.setState({isSorting: true})
+            await this.insertionSort()
+            this.setState({isSorting: false})
+        }
+        if(sort === 'selection') 
+        {   
+            this.setState({isSorting: true})
+            await this.selectionSort()
+            this.setState({isSorting: false})
+        }
+        if(sort === 'merge') 
+        {  
+            this.setState({isSorting: true})
+            await this.mergeSort(this.state.nums, 0, this.state.nums.length-1)
+            this.setState({isSorting: false})
+        }
+        if(sort === 'quick') 
+        {   
+            this.setState({isSorting: true})
+            await this.quickSort(this.state.nums, 0, this.state.nums.length-1)
+            this.setState({isSorting: false})
         }
     }
 
@@ -262,6 +319,14 @@ class Visualizer extends Component {
     }
 
     render() {
+        let {currentSort} = this.state
+        let tcomplex = (currentSort === 'insertion' || currentSort ==='selection' || currentSort === 'bubble' || currentSort === 'quick')
+                         ? "O(n^2)"
+                         : (currentSort !== null ? 'O(n*log(n))' : null)
+        let scomplex = (currentSort === 'insertion' || currentSort ==='selection' || currentSort === 'bubble')
+                         ? 'O(1)' 
+                         : (currentSort === 'merge' ? 'O(n)' : currentSort !== null ? 'O(n)' : null)
+        console.log(tcomplex)
         return (
             <div>
                 <h1 className='header'>
@@ -283,61 +348,72 @@ class Visualizer extends Component {
                 <span style={{fontSize:'65px'}}>R</span>
                 
                 </h1>
+
                 <div className='visualizer'>
                     <div className='visualizer-bars'>
                         {
                             this.state.nums.map((num, idx) => {
+                                this.sleep(50)
                                 return <Bar 
                                 height={num} 
                                 color={this.state.color[idx]}
+                                border={this.state.border[idx]}
                                  />
                             })
                         }
+                        
+                        
                     </div>
-
+                    
                     <div className='visualizer-sort-options'>
                         <h2 style={{letterSpacing:'4px'}}>SORTS</h2>
+
                         <button 
-                        onClick={this.bubbleSort} 
-                        className='glow-on-hover' 
-                        disabled={this.state.sorting}
-                        style={this.state.sorting ? {cursor:'not-allowed'} : {}}
+                        onClick={this.handleSort} 
+                        style={this.state.isSorting ? {cursor: 'not-allowed'} : {}}
+                        disabled={this.state.isSorting}
+                        className= {this.state.currentSort === 'bubble' ? `button active` : `button`}
+                        name='bubble'
                         >
                         Bubble
                         </button>
 
                         <button 
-                        onClick={this.insertionSort} 
-                        className='glow-on-hover'
-                        disabled={this.state.sorting}
-                        style={this.state.sorting ? {cursor:'not-allowed'} : {}} 
+                        onClick={this.handleSort} 
+                        style={this.state.isSorting ? {cursor: 'not-allowed'} : {}}
+                        disabled={this.state.isSorting}
+                        className= {this.state.currentSort === 'insertion' ? `button active` : `button`}
+                        name='insertion'
                         >
                         Insertion
                         </button>
 
                         <button 
-                        className='glow-on-hover' 
-                        onClick={() => this.mergeSort(this.state.nums, 0, 99)}
-                        disabled={this.state.sorting}
-                        style={this.state.sorting ? {cursor:'not-allowed'} : {}}
+                        className= {this.state.currentSort === 'merge' ? `button active` : `button`}
+                        style={this.state.isSorting ? {cursor: 'not-allowed'} : {}}
+                        disabled={this.state.isSorting}
+                        onClick={this.handleSort}
+                        name='merge'
                         >
                         Merge
                         </button>
 
                         <button 
-                        className='glow-on-hover' 
-                        onClick={this.selectionSort} 
-                        disabled={this.state.sorting}
-                        style={this.state.sorting ? {cursor:'not-allowed'} : {}}
+                        className= {this.state.currentSort === 'selection' ? `button active` : `button`} 
+                        style={this.state.isSorting ? {cursor: 'not-allowed'} : {}}
+                        disabled={this.state.isSorting}
+                        onClick={this.handleSort} 
+                        name='selection'
                         >
                         Selection
                         </button>
 
                         <button 
-                        className='glow-on-hover' 
-                        onClick={() => this.quickSort(this.state.nums, 0, this.state.nums.length-1)}
-                        disabled={this.state.sorting}
-                        style={this.state.sorting ? {cursor:'not-allowed'} : {}} 
+                        className= {this.state.currentSort === 'quick' ? `button active` : `button`}
+                        style={this.state.isSorting ? {cursor: 'not-allowed'} : {}} 
+                        disabled={this.state.isSorting}
+                        onClick={this.handleSort}
+                        name='quick'
                         >
                         Quick
                         </button>
@@ -346,7 +422,7 @@ class Visualizer extends Component {
                             <h2 style={{letterSpacing:'4px'}}>OPTIONS</h2>
                             <button 
                             onClick={this.refresh} 
-                            className='glow-on-hover'
+                            className='button'
                             >
                             Refresh
                             </button>
@@ -354,10 +430,20 @@ class Visualizer extends Component {
 
                     </div>
                 </div>
-
-                <div>
-                        <p  style={{color:'white'}}>CopyRights © 2022, Karthik Uppalapati</p>
+                
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <p style={{color:'white',float:'left', marginLeft:'25%', letterSpacing:'3px' , textAlign:'left'}}>{this.state.comparisons} comparisons have been done so far</p>
+                    
+                    {
+                        currentSort !== null ? (<div style={{display:'flex', float:'left',}}>
+                        <p style={{color: 'white', marginTop:'0', marginLeft:'250px', letterSpacing:'2px'}} >Time Complexity : {tcomplex}</p>
+                        <p style={{color: 'white', marginTop:'0', marginLeft:'300px', letterSpacing:'2px'}} >Space Complexity : {scomplex} </p>
+                        </div>) : ''
+                    }
+                    
                 </div>
+                
+                
             </div>
             
         )
